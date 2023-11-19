@@ -38,6 +38,7 @@ jobs:
                 allowed-to-fail: [false]
                 symfony-require: ['']
                 variant: [normal]
+                stability: [stable]
                 include:
                     - php-version: '8.0'
                       dependencies: lowest
@@ -63,6 +64,11 @@ jobs:
                       allowed-to-fail: false
                       symfony-require: 7.0.*
                       variant: symfony/symfony:"7.0.*"
+                    - php-version: '8.2'
+                      dependencies: highest
+                      allowed-to-fail: true
+                      symfony-require: normal
+                      stability: dev
 
         steps:
             - name: Checkout
@@ -77,6 +83,10 @@ jobs:
 
             - name: Add PHPUnit matcher
               run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+            - name: Use dev stability
+              if: matrix.stability == 'dev'
+              run: composer config prefer-stable false
 
             - name: Install variant
               if: matrix.variant != 'normal' && !startsWith(matrix.variant, 'symfony/symfony')
