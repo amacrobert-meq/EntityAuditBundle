@@ -16,6 +16,7 @@ namespace SimpleThings\EntityAudit\EventListener;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
@@ -520,7 +521,7 @@ class LogRevisionsListener implements EventSubscriber
         $conn = $em->getConnection();
 
         $params = [$this->getRevisionId($conn), $revType];
-        $types = [\PDO::PARAM_INT, \PDO::PARAM_STR];
+        $types = [ParameterType::INTEGER, ParameterType::STRING];
 
         $fields = [];
 
@@ -544,7 +545,7 @@ class LogRevisionsListener implements EventSubscriber
                         $fields[$sourceColumn] = true;
                         if (null === $data) {
                             $params[] = null;
-                            $types[] = \PDO::PARAM_STR;
+                            $types[] = ParameterType::STRING;
                         } else {
                             $params[] = $relatedId[$targetClass->fieldNames[$targetColumn]] ?? null;
                             $types[] = $targetClass->getTypeOfField($targetClass->getFieldForColumn($targetColumn));
@@ -639,7 +640,7 @@ class LogRevisionsListener implements EventSubscriber
     ): void {
         $conn = $em->getConnection();
         $joinTableParams = [$this->getRevisionId($conn), $revType];
-        $joinTableTypes = [\PDO::PARAM_INT, \PDO::PARAM_STR];
+        $joinTableTypes = [ParameterType::INTEGER, ParameterType::STRING];
 
         foreach (self::getRelationToSourceKeyColumns($assoc) as $targetColumn) {
             $joinTableParams[] = $entityData[$class->fieldNames[$targetColumn]];
