@@ -144,8 +144,25 @@ class CreateSchemaListener implements EventSubscriber
         $primaryKey = $revisionsTable->getPrimaryKey();
         \assert(null !== $primaryKey);
 
+        /**
+         * doctrine/dbal 3 support -- Table::addForeignKeyConstraint() takes a Table instead of a string
+         *
+         * NEXT_MAJOR: remove this `if` block
+         */
+        if (version_compare(\Composer\InstalledVersions::getVersion('doctrine/dbal') ?? '', '4.0.0', '<')) {
+            $relatedTable->addForeignKeyConstraint(
+                $revisionsTable, // @phpstan-ignore-line doctrine/dbal 3 support for old addForeignKeyConstraint() signature
+                [$this->config->getRevisionFieldName()],
+                $primaryKey->getColumns(),
+                [],
+                $revisionForeignKeyName
+            );
+
+            return;
+        }
+
         $relatedTable->addForeignKeyConstraint(
-            $revisionsTable,
+            $revisionsTable->getName(),
             [$this->config->getRevisionFieldName()],
             $primaryKey->getColumns(),
             [],
